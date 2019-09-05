@@ -7,6 +7,11 @@ const users = [
   { id: 3, name: 'Nathalie', age: 23, friendsIds: [1], height: 162, weight: 50 },
 ];
 
+const posts = [
+  { id: 1, authorId: 1, title: "Hello World!", content: "This is my first post.", likeGiverIds: [2] },
+  { id: 2, authorId: 2, title: "Good Night", content: "Have a Nice Dream =)", likeGiverIds: [2, 3] },
+  { id: 3, authorId: 1, title: "I Love U", content: "Here's my second post!", likeGiverIds: [] },
+];
 
 const typeDefs = gql`
   type Query {
@@ -21,8 +26,17 @@ const typeDefs = gql`
     name: String
     age: Int
     friends: [User]
+    posts: [Post]
     height(unit: HeightUnit = CENTIMETER): Float
     weight(unit: WeightUnit = KILOGRAM): Float
+  }
+  
+  type Post {
+    id: ID!
+    author: User
+    title: String
+    content: String
+    likeGivers: [User]
   }
 
   enum HeightUnit {
@@ -38,6 +52,9 @@ const typeDefs = gql`
   }
 `;
 
+const findUserById = id => users.find(user => user.id === id);
+const filterPostsByAuthorId = authorId => posts.filter(post => post.authorId === authorId);
+
 const resolvers = {
   Query: {
     hello: () => 'world',
@@ -52,6 +69,9 @@ const resolvers = {
       const { friendsIds } = parent;
       return users.filter(user => friendsIds.includes(user.id));
     },
+    posts: (parent, args, context) => {
+      return filterPostsByAuthorId(parent.id);
+    },
     height: (parent, args, context) => {
       const { unit } = args;
       if (!unit || unit === 'CENTIMETER') return parent.height;
@@ -65,6 +85,14 @@ const resolvers = {
       else if (unit === 'GRAM') return parent.weight * 1000;
       else if (unit === 'POUND') return parent.weight / 0.45359237;
       throw new Error('Weight unit "${unit}" not supported.');
+    }
+  },
+  Post: {
+    author: (parent, args, context) => {
+      return findUserById(parent.authorId);
+    },
+    likeGivers: (parent, args, context) => {
+      return parent.likeGiverIds.map(id => findUserById(id));
     }
   }
 };
