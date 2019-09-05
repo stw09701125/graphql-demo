@@ -1,0 +1,24 @@
+yarn-error.log
+
+# package directories
+node_modules
+jspm_packages
+.yarn-cache
+
+# editor
+.editorconfig
+*.swp
+.vscode
+
+.coverage
+*.log
+*.DS_Store
+*backup*
+*config.json
+config.json
+!default.config.json
+cover
+dist
+locale
+*.crt
+*.key
